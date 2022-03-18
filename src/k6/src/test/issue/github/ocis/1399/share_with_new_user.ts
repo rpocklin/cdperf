@@ -6,8 +6,8 @@ import { auth, defaults, k6, playbook, types, utils } from '../../../../../lib';
 const files: {
     size: number;
     unit: types.AssetUnit;
-}[] = times(500, () => ({ size: 10, unit: 'KB' }));
-const adminAuthFactory = new auth(utils.buildAccount({ login: defaults.ACCOUNTS.ADMIN }));
+}[] = times(1, () => ({ size: 10, unit: 'KB' }));
+const adminAuthFactory = new auth(utils.buildAccount({ login: defaults.ACCOUNTS.EINSTEIN }));
 const plays = {
     davCreate: new playbook.dav.Create(),
     davUpload: new playbook.dav.Upload(),
@@ -33,7 +33,7 @@ export const options: Options = k6.options({
 });
 
 export default (): void => {
-    const userAuthFactory = new auth({ login: utils.randomString(), password: utils.randomString() });
+    const userAuthFactory = new auth(utils.buildAccount({ login: defaults.ACCOUNTS.MARIE, ignore_defaults: true }));
     const user = {
         name: userAuthFactory.account.login,
         password: userAuthFactory.account.password,
@@ -47,20 +47,13 @@ export default (): void => {
         credential: adminAuthFactory.credential,
     };
 
-    plays.usersCreate.exec({
-        credential: admin.credential,
-        userName: user.name,
-        password: user.password,
-        email: `${user.name}@owncloud.com`,
-    });
+    const filesUploaded: { id: string; name: string }[] = [];
 
     plays.davCreate.exec({
         credential: admin.credential,
-        userName: admin.name,
         path: user.name,
+        userName: admin.name,
     });
-
-    const filesUploaded: { id: string; name: string }[] = [];
 
     files.forEach((f, i) => {
         const id = f.unit + f.size.toString();
@@ -81,22 +74,17 @@ export default (): void => {
         filesUploaded.push({ id, name: asset.name });
     });
 
-    const share = plays.shareCreate.exec({
+    plays.shareCreate.exec({
         credential: adminAuthFactory.credential,
         shareType: '0',
         shareWith: user.name,
-        path: user.name,
-        permissions: '1',
-    });
-
-    plays.shareAccept.exec({
-        credential: userAuthFactory.credential,
-        id: utils.parseXML(share.response.body).getElementsByTagName('id')[0].childNodes[0].textContent as string,
+        path: '/' + user.name,
+        permissions: '1', // 31 is all
     });
 
     plays.davPropfind.exec({
         credential: user.credential,
-        path: ['Shares', user.name].join('/'),
+        path: '/' + user.name,
         userName: user.name,
     });
 
@@ -104,12 +92,10 @@ export default (): void => {
         plays.davDownload.exec({
             credential: user.credential,
             userName: user.name,
-            path: ['Shares', user.name, f.name].join('/'),
+            path: ['/', user.name, f.name].join('/'),
             tags: { asset: f.id },
         });
     });
-
-    plays.usersDelete.exec({ credential: admin.credential, userName: user.name });
 
     plays.davDelete.exec({
         credential: admin.credential,
