@@ -20,7 +20,7 @@ export class Upload {
         return api.request({
             method: 'PUT',
             credential,
-            path: `/remote.php/dav/files/${userName}/${path}/${asset.name}`,
+            path: `/plus/remote.php/webdav/${path}/${asset.name}`,
             params: { tags },
             body: asset.bytes,
         });
@@ -42,7 +42,7 @@ export class Download {
         return api.request({
             method: 'GET',
             credential,
-            path: `/remote.php/dav/files/${userName}/${path}`,
+            path: `/plus/remote.php/webdav/${path}`,
             params: { tags },
         });
     }
@@ -63,7 +63,7 @@ export class Delete {
         return api.request({
             method: 'DELETE',
             credential,
-            path: `/remote.php/dav/files/${userName}/${path}`,
+            path: `/plus/remote.php/webdav/${path}`,
             params: { tags },
         });
     }
@@ -84,7 +84,7 @@ export class Create {
         return api.request({
             method: 'MKCOL',
             credential,
-            path: `/remote.php/dav/files/${userName}/${path}`,
+            path: `/plus/remote.php/webdav/${path}`,
             params: { tags },
             body: null,
         });
@@ -106,7 +106,7 @@ export class Propfind {
         return api.request({
             method: 'PROPFIND',
             credential,
-            path: `/remote.php/dav/files/${userName}/${path}`,
+            path: `/plus/remote.php/webdav/${path}`,
             params: { tags },
         });
     }
@@ -129,10 +129,10 @@ export class Move {
         return api.request({
             method: 'MOVE',
             credential,
-            path: `/remote.php/dav/files/${userName}/${path}`,
+            path: `/plus/remote.php/webdav/${path}`,
             params: { tags },
             headers: {
-                destination: `/remote.php/dav/files/${userName}/${destination}`,
+                destination: `/plus/remote.php/webdav/${destination}`,
             },
         });
     }
@@ -152,7 +152,7 @@ export class Trash {
         return api.request({
             method: 'DELETE',
             credential,
-            path: `/remote.php/dav/trash-bin/${userName}/${fileid}`,
+            path: `/plus/remote.php/dav/trash-bin/${fileid}`,
             params: { tags },
         });
     }
@@ -175,10 +175,10 @@ export class Restore {
         return api.request({
             method: 'MOVE',
             credential,
-            path: `/remote.php/dav/trash-bin/${userName}/${fileid}`,
+            path: `/plus/remote.php/dav/trash-bin/${fileid}`,
             params: { tags },
             headers: {
-                destination: `/remote.php/dav/files/${userName}/${path}`,
+                destination: `/plus/remote.php/webdav/${path}`,
                 overwrite: 'F',
             },
         });
