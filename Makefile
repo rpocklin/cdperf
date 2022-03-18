@@ -3,8 +3,8 @@ ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 .PHONY: build
 build:
-	docker build --tag owncloud/cdperf-k6 src/k6
-	docker run --rm --volume $(ROOT_DIR)/tests/k6:/cp owncloud/cdperf-k6 cp -r . /cp
+	docker build --no-cache --tag owncloud/cdperf-k6 src/k6
+	docker run --rm -u 10501:10501 -v $(ROOT_DIR)/tests/k6:/cp -u 10501:10501 owncloud/cdperf-k6 cp -r . /cp
 	chmod +x ./scripts/cdperf
 
 .PHONY: local

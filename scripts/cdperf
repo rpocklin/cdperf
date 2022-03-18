@@ -9,7 +9,7 @@ trap "stop; exit;" SIGINT SIGTERM
 
 host_docker_host=${DOCKER_HOST:-}
 
-cloud_docker=${CDPERF_CLOUD_DOCKER:-"true"}
+cloud_docker=${CDPERF_CLOUD_DOCKER:-"false"}
 cloud_docker_host=${CDPERF_CLOUD_DOCKER_HOST:-}
 cloud_docker_image=${CDPERF_CLOUD_DOCKER_IMAGE:-}
 cloud_docker_publish=${CDPERF_CLOUD_DOCKER_PUBLISH:-}
@@ -336,8 +336,8 @@ function k6_run(){
   [[ $k6_vus ]] && k6_params+=("--vus=$k6_vus")
   [[ $k6_out ]] && k6_params+=("--out=$k6_out")
   [[ $k6_debug ]] && k6_params+=("--http-debug")
-  [[ $k6_csv ]] && k6_params+=("--out csv=$k6_csv")
-  [[ $k6_json ]] && k6_params+=("--out json=$k6_json")
+  [[ $k6_csv ]] && k6_params+=("--out")  && k6_params+=("csv=/out/$k6_csv")
+  [[ $k6_json ]] && k6_params+=("--out") && k6_params+=("json=/out/$k6_json")
   [[ $k6_quiet == true ]] && k6_params+=("--quiet")
 
   k6_env=()
@@ -356,19 +356,27 @@ function k6_run(){
 
   for i in "${!k6_env[@]}"
   do
-    export "${k6_env[$i]}"
-    k6_env[$i]="--env ${k6_env[$i]}"
+    if [[ $k6_docker == true ]]
+    then
+      k6_env[$i]="--env ${k6_env[$i]}"
+      echo "${k6_env[$i]}"
+    else
+      export "${k6_env[$i]}"
+      k6_env[$i]="${k6_env[$i]}"
+    fi
   done
 
   # run k6
   for t in $(realpath "$k6_scripts");
   do
+    echo "k6 run ${k6_params[@]} $(basename "$t")"
     if [[ -f $t ]]
     then
       if [[ $k6_docker == true ]]
       then
         # shellcheck disable=SC2068
-        docker run ${k6_env[@]} --add-host=host.docker.internal:host-gateway --rm "owncloud/cdperf-k6" k6 run "${k6_params[@]}" "$(basename "$t")"
+        # docker version in jenkins.aarnet.edu.au is currently 18.06 so cannot use --add-host=host.docker.internal:host-gateway
+        docker run ${k6_env[@]} --add-host=host.docker.internal:172.17.0.1 --rm -v $(pwd)/out:/out:rw -u 10501:10501 "owncloud/cdperf-k6" k6 run "${k6_params[@]}" "$(basename "$t")"
       else
         # shellcheck disable=SC2068
         k6 run ${k6_params[@]} "$t"

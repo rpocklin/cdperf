@@ -1,10 +1,13 @@
+
 FROM golang as k6
 
 RUN go install go.k6.io/xk6/cmd/xk6@latest && \
     xk6 build --with github.com/grafana/xk6-output-influxdb
 
-
 FROM node:15-alpine as node
+
+RUN addgroup -g 10501 -S "jenkins-ssh" && adduser -u 10501 -S "jenkins-ssh" -G "jenkins-ssh"
+USER jenkins-ssh
 
 WORKDIR /k6
 
@@ -29,9 +32,11 @@ RUN apk update && \
 	apk add bash curl && \
 	rm -rf /var/cache/apk/*
 
-
 COPY ./entrypoint /usr/bin/entrypoint
 RUN chmod +x /usr/bin/entrypoint
+
+RUN addgroup -g 10501 -S "jenkins-ssh" && adduser -u 10501 -S "jenkins-ssh" -G "jenkins-ssh"
+USER jenkins-ssh
 
 WORKDIR /scripts
 
