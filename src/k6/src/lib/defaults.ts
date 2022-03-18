@@ -13,6 +13,7 @@ export class ENV {
 export class ACCOUNTS {
     public static readonly ADMIN = 'admin';
     public static readonly EINSTEIN = 'einstein';
+    public static readonly MARIE = 'marie';
     public static readonly RICHARD = 'richard';
     public static readonly ALL: { [key: string]: types.Account } = {
         admin: {
@@ -20,8 +21,12 @@ export class ACCOUNTS {
             password: 'admin',
         },
         einstein: {
-            login: 'einstein',
-            password: 'relativity',
+            login: __ENV.CLOUDSTOR_USER1,
+            password: __ENV.CLOUDSTOR_PASS1,
+        },
+        marie: {
+            login: __ENV.CLOUDSTOR_USER2,
+            password: __ENV.CLOUDSTOR_PASS2,
         },
         richard: {
             login: 'richard',
