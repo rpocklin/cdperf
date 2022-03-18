@@ -9,9 +9,9 @@ const files: {
     size: number;
     unit: types.AssetUnit;
 }[] = [
-    ...times(100, () => ({ size: 500, unit: 'KB' as types.AssetUnit })),
-    ...times(50, () => ({ size: 5, unit: 'MB' as types.AssetUnit })),
-    ...times(10, () => ({ size: 25, unit: 'MB' as types.AssetUnit })),
+    ...times(1, () => ({ size: 500, unit: 'KB' as types.AssetUnit })),
+    ...times(1, () => ({ size: 5, unit: 'MB' as types.AssetUnit })),
+    ...times(1, () => ({ size: 25, unit: 'MB' as types.AssetUnit })),
 ];
 const authFactory = new auth(utils.buildAccount({ login: defaults.ACCOUNTS.EINSTEIN }));
 const plays = {
