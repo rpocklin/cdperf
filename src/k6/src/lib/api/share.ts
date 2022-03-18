@@ -22,7 +22,10 @@ export class Create {
         return api.request({
             method: 'POST',
             credential,
-            path: `/ocs/v1.php/apps/files_sharing/api/v1/shares`,
+            headers: {
+                'OCS-APIREQUEST': 'true',
+            },
+            path: `/plus/ocs/v1.php/apps/files_sharing/api/v1/shares`,
             params: { tags },
             body: { shareType, shareWith, path, permissions },
         });
@@ -42,7 +45,7 @@ export class Accept {
         return api.request({
             method: 'POST',
             credential,
-            path: `/ocs/v1.php/apps/files_sharing/api/v1/shares/pending/${id}`,
+            path: `/plus/ocs/v1.php/apps/files_sharing/api/v1/shares/pending/${id}`,
             params: { tags },
         });
     }
